@@ -15,6 +15,7 @@ import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.NoiseSuppressor
 import android.os.Build
 import android.os.Process
+import android.os.SystemClock
 import android.util.Log
 import java.io.File
 
@@ -24,10 +25,14 @@ import java.io.File
  * Why not let CameraX record audio?
  * CameraX owns its internal AudioRecord and does not expose the audio session id, so
  * NoiseSuppressor/AcousticEchoCanceler cannot be attached to it. This class owns the
- * session, selects VOICE_RECOGNITION (falling back to CAMCORDER and then MIC), uses a 400 ms
- * warm-up probe to discard sources that deliver a dead zero-PCM stream, attaches the platform
- * DSP effects, and writes a small .m4a file. The video-only CameraX output and this audio
- * file are muxed losslessly at the end of the recording.
+ * session, routes audio through detected mics (Bluetooth SCO via MODE_IN_COMMUNICATION +
+ * SCO link, wired/USB mics via CAMCORDER-first order), falls back to the phone-mic chain
+ * (CAMCORDER → VOICE_COMMUNICATION → UNPROCESSED → MIC → VOICE_RECOGNITION), attaches the
+ * platform DSP effects, and writes a small .m4a file. The video-only CameraX output and
+ * this audio file are muxed losslessly at the end of the recording.
+ *
+ * Every external — including the SCO link — is released in all cleanup paths
+ * (stop, cancel, failure), so nothing stays on the headset after recording ends.
  *
  * The encoder is fed in small, reused buffers: no PCM is accumulated in RAM, so memory
  * usage does not grow with recording length. One instance is used per recording.
@@ -63,6 +68,13 @@ class StudioAudioRecorder {
         val sampleRate: Int,
         val source: SourceChoice
     )
+
+    // Where the microphone audio is actually coming from/how the OS is routing it.
+    private enum class AudioRouting {
+        DEFAULT,       // phone microphone: CAMCORDER first (best on MIUI), then DSP sources
+        BLUETOOTH_SCO, // SCO mic (headset, TWS, neckband): VOICE_COMMUNICATION over SCO
+        WIRED_OR_USB   // wired headset / USB mic: CAMCORDER first
+    }
 
     private val lock = Any()
 
@@ -107,6 +119,8 @@ class StudioAudioRecorder {
     private var audioTrackIndex = -1
     private var muxerStarted = false
     private var encodedAnything = false
+    private var scoRoutingEnabled = false
+    private var scoRoutingContext: Context? = null
 
     private val pcmBuffer = ByteArray(READ_CHUNK_BYTES)
 
@@ -116,11 +130,13 @@ class StudioAudioRecorder {
      * Caller must hold RECORD_AUDIO. This method blocks for a few milliseconds while the
      * hardware session is created; call it from a background executor.
      *
+     * @param context Used to detect external microphones (Bluetooth SCO, wired headset,
+     *     USB mic) and configure the OS audio route before the capture session opens.
      * @throws AudioCaptureException if the device cannot provide a usable microphone session.
      */
     @SuppressLint("MissingPermission")
     @Synchronized
-    fun start(file: File): StartInfo {
+    fun start(context: Context, file: File): StartInfo {
         check(state == State.IDLE) { "StudioAudioRecorder is single-use" }
         state = State.PREPARING
         canceled = false
@@ -130,7 +146,8 @@ class StudioAudioRecorder {
         try {
             file.parentFile?.mkdirs()
 
-            val setup = createAudioRecord()
+            val routing = configureAudioRouting(context)
+            val setup = createAudioRecord(routing)
             audioRecord = setup.record
             sampleRate = setup.sampleRate
             source = setup.source
@@ -236,21 +253,111 @@ class StudioAudioRecorder {
     // Setup
     // ------------------------------------------------------------------------------------
 
+    /**
+     * Detects external input devices and prepares the OS audio route.
+     *
+     * Bluetooth SCO needs explicit setup on Android: the mic only flows when the phone is
+     * in communication mode and the SCO link is up, otherwise capture reads silence or a
+     * phantom phone-speaker mic. Wired headsets / USB mics route automatically, so they
+     * just need a CAMCORDER-first source order.
+     *
+     * Some devices take up to ~1s for the SCO link to establish, so this waits for the
+     * connection instead of opening a dead source and hoping.
+     */
     @SuppressLint("MissingPermission")
-    private fun createAudioRecord(): AudioSetup {
+    private fun configureAudioRouting(context: Context): AudioRouting {
+        val app = context.applicationContext
+        val am = app.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: return AudioRouting.DEFAULT
+
+        val inputs = runCatching { am.getDevices(AudioManager.GET_DEVICES_INPUTS) }
+            .getOrNull() ?: emptyArray()
+
+        val hasBluetoothSco = inputs.any {
+            it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                (Build.VERSION.SDK_INT >= 31 && it.type == AudioDeviceInfo.TYPE_BLE_HEADSET)
+        }
+        val hasWiredOrUsb = inputs.any {
+            it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                it.type == AudioDeviceInfo.TYPE_USB_DEVICE ||
+                it.type == AudioDeviceInfo.TYPE_USB_HEADSET
+        }
+
+        if (hasBluetoothSco) {
+            Log.i(TAG, "Bluetooth SCO mic detected; enabling SCO route")
+            runCatching { am.mode = AudioManager.MODE_IN_COMMUNICATION }
+            @Suppress("DEPRECATION")
+            runCatching { am.isBluetoothScoOn = true }
+            runCatching { am.startBluetoothSco() }
+
+            val deadline = SystemClock.uptimeMillis() + 900L
+            while (SystemClock.uptimeMillis() < deadline) {
+                @Suppress("DEPRECATION")
+                val connected = runCatching { am.isBluetoothScoOn }.getOrDefault(false)
+                if (connected) break
+                SystemClock.sleep(50L)
+            }
+
+            scoRoutingEnabled = true
+            scoRoutingContext = context.applicationContext
+            return AudioRouting.BLUETOOTH_SCO
+        }
+
+        return if (hasWiredOrUsb) {
+            Log.i(TAG, "Wired/USB mic detected; using CAMCORDER route")
+            AudioRouting.WIRED_OR_USB
+        } else {
+            AudioRouting.DEFAULT
+        }
+    }
+
+    /** Undoes the SCO route. Called from every cleanup path (stop, cancel, failure). */
+    private fun resetScoRouting() {
+        if (!scoRoutingEnabled) return
+        scoRoutingEnabled = false
+        val app = scoRoutingContext ?: return
+        scoRoutingContext = null
+        val am = app.applicationContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: return
+        runCatching { am.stopBluetoothSco() }
+        @Suppress("DEPRECATION")
+        runCatching { am.isBluetoothScoOn = false }
+        runCatching { am.mode = AudioManager.MODE_NORMAL }
+        Log.i(TAG, "Bluetooth SCO routing closed")
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun createAudioRecord(routing: AudioRouting): AudioSetup {
         val sampleRates = intArrayOf(48_000, 44_100, 16_000)
 
-        // Source order matters on MIUI. CAMCORDER routes voice through the primary mic
-        // (not the top noise-canceling mic). VOICE_COMMUNICATION is processed but built
-        // to capture voice, then UNPROCESSED raw, then plain MIC, VR as last resort.
-        val orderedSources = listOf(
-            SourceChoice(MediaRecorder.AudioSource.CAMCORDER, "CAMCORDER"),
-            SourceChoice(MediaRecorder.AudioSource.VOICE_COMMUNICATION, "VOICE_COMMUNICATION"),
-            SourceChoice(MediaRecorder.AudioSource.UNPROCESSED, "UNPROCESSED"),
-            SourceChoice(MediaRecorder.AudioSource.MIC, "MIC"),
-            SourceChoice(MediaRecorder.AudioSource.VOICE_RECOGNITION, "VOICE_RECOGNITION")
-        )
-        Log.i(TAG, "Mic routing: ${orderedSources.joinToString(" -> ") { it.label }}")
+        // Source order depends on how the OS routes the mic:
+        //   BLUETOOTH_SCO -> VOICE_COMMUNICATION (SCO mic, processed, correct routing)
+        //   WIRED_OR_USB  -> CAMCORDER first (wired headset/USB mic via primary mic path)
+        //   DEFAULT       -> CAMCORDER first (best on MIUI), then DSP sources, then raw MIC
+        val orderedSources = when (routing) {
+            AudioRouting.BLUETOOTH_SCO -> listOf(
+                SourceChoice(MediaRecorder.AudioSource.VOICE_COMMUNICATION, "VOICE_COMMUNICATION"),
+                SourceChoice(MediaRecorder.AudioSource.VOICE_RECOGNITION, "VOICE_RECOGNITION"),
+                SourceChoice(MediaRecorder.AudioSource.CAMCORDER, "CAMCORDER"),
+                SourceChoice(MediaRecorder.AudioSource.UNPROCESSED, "UNPROCESSED"),
+                SourceChoice(MediaRecorder.AudioSource.MIC, "MIC")
+            )
+            AudioRouting.WIRED_OR_USB -> listOf(
+                SourceChoice(MediaRecorder.AudioSource.CAMCORDER, "CAMCORDER"),
+                SourceChoice(MediaRecorder.AudioSource.MIC, "MIC"),
+                SourceChoice(MediaRecorder.AudioSource.UNPROCESSED, "UNPROCESSED"),
+                SourceChoice(MediaRecorder.AudioSource.VOICE_COMMUNICATION, "VOICE_COMMUNICATION"),
+                SourceChoice(MediaRecorder.AudioSource.VOICE_RECOGNITION, "VOICE_RECOGNITION")
+            )
+            AudioRouting.DEFAULT -> listOf(
+                SourceChoice(MediaRecorder.AudioSource.CAMCORDER, "CAMCORDER"),
+                SourceChoice(MediaRecorder.AudioSource.VOICE_COMMUNICATION, "VOICE_COMMUNICATION"),
+                SourceChoice(MediaRecorder.AudioSource.UNPROCESSED, "UNPROCESSED"),
+                SourceChoice(MediaRecorder.AudioSource.MIC, "MIC"),
+                SourceChoice(MediaRecorder.AudioSource.VOICE_RECOGNITION, "VOICE_RECOGNITION")
+            )
+        }
+        Log.i(TAG, "Mic routing ($routing): ${orderedSources.joinToString(" -> ") { it.label }}")
 
         // 2) Open the winner, falling back through the rest of the chain if the device
         //    refuses any of them.
@@ -637,6 +744,7 @@ class StudioAudioRecorder {
             runCatching { audioRecord?.stop() }
             runCatching { audioRecord?.release() }
             audioRecord = null
+            resetScoRouting()
 
             runCatching { noiseSuppressor?.release() }
             noiseSuppressor = null

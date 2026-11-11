@@ -52,6 +52,11 @@ import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -95,9 +100,9 @@ class MainActivity : ComponentActivity() {
     private val audioExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "WowCamAudioControl").apply { isDaemon = true }
     }
-    private val muxExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "WowCamMux").apply { isDaemon = true }
-    }
+    // Heavy mux + commit runs here on Dispatchers.IO instead of the main thread, so the
+    // UI stays responsive while the MP4 is assembled.
+    private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     // Provider creation, camera capability probes and other one-off work. Never used for
     // per-frame data; audio and muxing have their own single-thread executors below.
     private val controlExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
@@ -338,7 +343,7 @@ class MainActivity : ComponentActivity() {
         runCatching { cameraProvider?.unbindAll() }
         detachCamera()
         audioExecutor.shutdown()
-        muxExecutor.shutdown()
+        ioScope.cancel()
         controlExecutor.shutdown()
 
         super.onDestroy()
@@ -1492,7 +1497,7 @@ class MainActivity : ComponentActivity() {
 
         audioExecutor.execute {
             try {
-                recorder.start(audioFile)
+                recorder.start(this@MainActivity, audioFile)
                 mainHandler.post {
                     if (isActivityGone()) return@post
                     if (audioRecorder !== recorder) {
@@ -1644,7 +1649,9 @@ class MainActivity : ComponentActivity() {
 
         setPhase(Phase.PROCESSING)
 
-        muxExecutor.execute {
+        // Entire mux (MediaExtractor -> MediaMuxer copy, including final muxer flush and
+        // commit/rewrite) runs on Dispatchers.IO so the UI thread never waits for disk I/O.
+        ioScope.launch {
             try {
                 val result = Mp4Muxer.mux(videoFile, audio?.file, offsetUs, output)
                 val uri = output.commit()
