@@ -16,7 +16,7 @@ artifacts/
 webtest/node_modules/
 webtest/test-results/
 webtest/playwright-report/
-public/wow-cam.zip
+docs/wow-cam.zip
 
 # IDE
 .idea/

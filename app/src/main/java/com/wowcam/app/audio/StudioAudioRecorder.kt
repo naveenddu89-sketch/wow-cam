@@ -686,7 +686,9 @@ class StudioAudioRecorder {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 runCatching {
-                    val devices = am.getMicrophones()
+                    // getMicrophones() returns MicrophoneInfo, which setCommunicationDevice()
+                    // cannot consume — use the communication-device API it pairs with.
+                    val devices = am.availableCommunicationDevices
                     val hasExternalMic = devices.any { it.type != AudioDeviceInfo.TYPE_BUILTIN_MIC }
                     if (!hasExternalMic) {
                         runCatching { am.stopBluetoothSco() }

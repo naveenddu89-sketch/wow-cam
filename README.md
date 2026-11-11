@@ -9,6 +9,17 @@ WOW CAM - ULTRA HD
 1080P • 9:16 • 30 MBPS
 ```
 
+## Install (public)
+
+| What | Link |
+|---|---|
+| **Download page** | https://naveenddu89-sketch.github.io/wow-cam/ |
+| **Direct APK** (zip-wrapped; rename to `.apk` if saved as `.zip`) | https://naveenddu89-sketch.github.io/wow-cam/wow-cam.zip |
+| **Stable release asset** | https://github.com/naveenddu89-sketch/wow-cam/releases/latest/download/wow-cam.apk |
+| **Live interactive demo** | https://naveenddu89-sketch.github.io/wow-cam/demo/ |
+
+Downloads are debug-signed, installable directly. Android 7.0+. Recordings: `Movies/WowCam`.
+
 ## What it does
 
 | | |
