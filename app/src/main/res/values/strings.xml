@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">wow cam</string>
+    <string name="banner">WOW CAM - ULTRA HD</string>
+    <string name="quality_default">1080P • 9:16 • 60 MBPS</string>
+    <string name="quality_format">%1$s • 9:16 • %2$d MBPS</string>
+    <string name="fps_default">30 FPS</string>
+    <string name="fps_format">%1$d FPS</string>
+    <string name="timer_zero">00:00</string>
+
+    <string name="hint_record">TAP TO RECORD</string>
+    <string name="hint_stop">TAP TO STOP</string>
+    <string name="hint_processing">PROCESSING…</string>
+    <string name="hint_preparing">STARTING…</string>
+    <string name="hint_countdown">STARTING IN…</string>
+    <string name="hint_switching">SWITCHING CAMERA…</string>
+    <string name="hint_camera_starting">STARTING CAMERA…</string>
+    <string name="hint_processing_long">FINALIZING…</string>
+    <string name="hint_tap_to_grant">TAP TO GRANT ACCESS</string>
+
+    <string name="filter_default">FILTER • NORMAL</string>
+    <string name="filter_chip_format">FILTER • %1$s</string>
+    <string name="filter_normal">NORMAL</string>
+    <string name="filter_vivid">VIVID</string>
+    <string name="filter_mono">MONO</string>
+    <string name="filter_warm">WARM</string>
+
+    <string name="timer_default">TIMER • OFF</string>
+    <string name="timer_chip_format">TIMER • %1$s</string>
+    <string name="timer_off">OFF</string>
+    <string name="timer_3s">3S</string>
+    <string name="timer_10s">10S</string>
+
+    <string name="zoom_label">ZOOM</string>
+    <string name="zoom_value_default">1.0x</string>
+
+    <string name="countdown_default">3</string>
+    <string name="countdown_cancel">TAP TO CANCEL</string>
+
+    <string name="audio_idle">VOICE ISO • ON-DEVICE</string>
+    <string name="db_live">MIC %1$.0f dBFS</string>
+    <string name="audio_ready_format">VOICE ISO • %1$s</string>
+    <string name="audio_off">VOICE ISO • OFF (VIDEO ONLY)</string>
+    <string name="audio_grant">GRANT MIC ACCESS FOR STUDIO AUDIO</string>
+    <string name="audio_effects_none">DEVICE DSP</string>
+
+    <string name="saved_share">SAVED • TAP TO SHARE</string>
+    <string name="saved_no_share">SAVED TO MOVIES/WOWCAM</string>
+    <string name="save_failed">SAVE FAILED • TRY AGAIN</string>
+    <string name="recording_failed">RECORDING FAILED</string>
+
+    <string name="cd_record">Start recording</string>
+    <string name="cd_stop">Stop recording</string>
+    <string name="cd_fps">Video frame rate</string>
+    <string name="cd_filter">Cycle cinematic filter</string>
+    <string name="cd_timer">Recording timer</string>
+    <string name="cd_zoom">Zoom level</string>
+    <string name="cd_flip">Switch camera</string>
+    <string name="cd_flash_on">Turn light on</string>
+    <string name="cd_flash_off">Turn light off</string>
+    <string name="cd_cancel_countdown">Cancel countdown</string>
+    <string name="cd_preview">Camera preview</string>
+
+    <string name="permission_title">Camera and microphone access</string>
+    <string name="permission_message">wow cam records video and studio audio entirely on this device. Camera and microphone access are required to continue.</string>
+    <string name="permission_open_settings">OPEN SETTINGS</string>
+    <string name="permission_cancel">NOT NOW</string>
+    <string name="permission_denied">Camera and microphone access are required to record.</string>
+
+    <string name="camera_unavailable">Camera unavailable on this device.</string>
+    <string name="camera_start_failed">Could not start the camera.</string>
+    <string name="fps_60_unavailable">60 FPS is not supported by this camera.</string>
+    <string name="fps_fallback">60 FPS unavailable • switched to 30 FPS</string>
+    <string name="thermal_fallback">Heat detected • keeping a smooth 30 FPS</string>
+    <string name="filters_unavailable">Live filters unavailable on this device • recording without a look.</string>
+    <string name="filter_natural">Natural</string>
+    <string name="cd_quality">Setup: video quality and save location</string>
+    <string name="quality_dialog_title">Video quality</string>
+    <string name="quality_menu_1080">1080P FHD • 60 Mbps</string>
+    <string name="quality_menu_4k">4K UHD • 50 Mbps</string>
+    <string name="quality_menu_720">720P HD • 16 Mbps</string>
+    <string name="quality_4k_fallback">4K not supported or encoder overloaded • kept 1080P.</string>
+    <string name="setup_dialog_title">Setup</string>
+    <string name="setup_separator">──────────</string>
+    <string name="storage_menu_reels">Reels / Short → Gallery</string>
+    <string name="storage_menu_long">Long video → SD card</string>
+    <string name="storage_sd_required">Choose an SD card folder (e.g. WowCam) to enable.</string>
+    <string name="storage_sd_ok">Save location: SD card</string>
+    <string name="storage_sd_reset">SD card access is not set up • using Gallery.</string>
+    <string name="storage_sd_unavailable">SD card folder is not writable • saving to Gallery.</string>
+    <string name="hint_capability_title">What this phone can do</string>
+    <string name="hint_capability_msg">• 1080p recording — supported on every Android\n• 4K UHD: %1$s\n• 60 FPS frame lock: %2$s\n• EIS video stabilization: %3$s\n• OIS stabilization: %4$s\n\nTips:\n• Filter &amp; timer keep the last value you picked\n• Share videos as “File / Document” to avoid re-encoding\n• Tap the “1080P • 9:16 • 60 MBPS” line to change quality or save location</string>
+    <string name="hint_capability_ok">GOT IT</string>
+    <string name="flash_unavailable">Flash is unavailable on this camera.</string>
+    <string name="storage_unavailable">Movies/WowCam is not available. Check free storage.</string>
+    <string name="audio_failed">Microphone unavailable • recording video only.</string>
+    <string name="record_start_failed">Could not start recording. Try again.</string>
+    <string name="share_chooser">Share original video</string>
+    <string name="share_failed">No app can share this video.</string>
+    <string name="saved_toast">Saved to Movies/WowCam</string>
+    <string name="save_failed_toast">Could not save the video.</string>
+    <string name="recording_too_short">Recording was too short to save.</string>
+</resources>

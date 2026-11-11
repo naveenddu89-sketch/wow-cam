@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>wow cam — Ultra HD Android Camera</title>
+<meta name="description" content="Pro-grade Android camera: 1080p high-bitrate recording, studio audio with noise suppression, EIS stabilization, cinematic filters, on-device only. No account, no internet permission.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  :root {
+    --bg: #08080a;
+    --panel: #101014;
+    --panel-2: #15151a;
+    --stroke: rgba(255,255,255,.08);
+    --red: #ff3b30;
+    --white: #ffffff;
+    --secondary: #d7d7db;
+    --tertiary: #9a9aa2;
+    --accent: #ffd60a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+  header {
+    padding: 34px 20px 10px;
+    text-align: center;
+  }
+  .logo {
+    display: inline-grid; place-items: center;
+    width: 96px; height: 96px;
+    border-radius: 26px;
+    background: linear-gradient(160deg, #1c1c22, #101014);
+    border: 1px solid var(--stroke);
+    box-shadow: 0 24px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    margin-bottom: 22px;
+  }
+  .logo svg { width: 56px; height: 56px; }
+  h1 { font-size: 34px; letter-spacing: .16em; font-weight: 800; }
+  .tag { margin-top: 6px; color: var(--tertiary); letter-spacing: .28em; font-size: 12px; text-transform: uppercase; }
+  .tag b { color: var(--accent); font-weight: 700; }
+
+  .stats {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    margin: 26px 0 8px;
+  }
+  .stat {
+    border: 1px solid var(--stroke);
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 12px; color: var(--secondary); letter-spacing: .04em;
+  }
+  .stat b { color: var(--white); display: block; font-size: 16px; letter-spacing: 0; }
+
+  .cta { text-align: center; margin: 28px 0 8px; }
+  .btn {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: .12em;
+    padding: 18px 42px;
+    border-radius: 999px;
+    font-size: 17px;
+    box-shadow: 0 14px 34px rgba(255,59,48,.35), inset 0 1px 0 rgba(255,255,255,.25);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:active { transform: scale(.97); }
+  .meta { margin-top: 14px; color: var(--tertiary); font-size: 12px; letter-spacing: .06em; }
+  .meta code { color: var(--secondary); }
+
+  .demo {
+    display: block; text-align: center; margin-top: 16px;
+    color: var(--secondary); font-size: 13px; letter-spacing: .08em;
+  }
+  .demo span { color: var(--accent); }
+
+  section.card {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 18px;
+    padding: 22px 22px;
+    margin: 22px 0;
+  }
+  h2 { font-size: 13px; letter-spacing: .22em; color: var(--tertiary); text-transform: uppercase; margin-bottom: 14px; }
+  .steps { counter-reset: step; }
+  .step {
+    counter-increment: step;
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px solid var(--stroke);
+    color: var(--secondary); font-size: 14px; line-height: 1.5;
+  }
+  .step:last-child { border-bottom: none; }
+  .step::before {
+    content: counter(step);
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--stroke);
+    color: var(--accent);
+    font-weight: 700; font-size: 13px;
+    display: grid; place-items: center;
+  }
+  .step code { color: var(--white); background: var(--panel-2); padding: 1px 6px; border-radius: 6px; font-size: 12px; }
+
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+  .feat {
+    background: var(--panel-2);
+    border: 1px solid var(--stroke);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .feat b { font-size: 13px; }
+  .feat p { color: var(--tertiary); font-size: 12px; margin-top: 5px; line-height: 1.45; }
+
+  footer {
+    text-align: center; padding: 26px 20px 40px;
+    color: var(--tertiary); font-size: 11px; letter-spacing: .08em; line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20 4h-3.2L15 2H9L7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"
+            fill="#ff3b30"/>
+      <circle cx="12" cy="12" r="4.4" fill="#0b0b0d"/>
+      <circle cx="12" cy="12" r="2.4" fill="#ff3b30"/>
+    </svg>
+  </div>
+  <h1>wow cam</h1>
+  <p class="tag">Ultra HD <b>•</b> On-Device <b>•</b> Offline</p>
+</header>
+
+<div class="wrap">
+
+  <div class="stats" aria-label="Key specs">
+    <div class="stat"><b>1080p</b>9:16 • up to 60 FPS*</div>
+    <div class="stat"><b>35 Mbps</b>H.264 high bitrate</div>
+    <div class="stat"><b>NS + AEC</b>studio audio</div>
+    <div class="stat"><b>EIS</b>stabilization</div>
+    <div class="stat"><b>0</b>internet permission</div>
+  </div>
+
+  <div class="cta">
+    <a class="btn" href="/wow-cam.apk" download>DOWNLOAD APK</a>
+    <p class="meta">wow cam v1.0.0 (versionCode 1) • <code>com.wowcam.app</code> • ~4.5 MB<br>Android 7.0 (API 24) and above</p>
+    <a class="demo" href="/demo/">Try the live interactive demo → <span>UI, no APK needed</span></a>
+  </div>
+
+  <section class="card" aria-label="Install instructions">
+    <h2>How to install</h2>
+    <div class="steps">
+      <div class="step">Tap <code>DOWNLOAD APK</code> above. Your browser may ask to allow downloads from this site — allow it.</div>
+      <div class="step">Open the downloaded file (e.g. from your <code>Downloads</code> folder or the notification).</div>
+      <div class="step">Android will say “Install unknown apps?” — allow it for your file manager or browser, then tap <code>Install</code>.</div>
+      <div class="step">Open <b>wow cam</b>, grant <b>Camera</b> and <b>Microphone</b> access. Recordings save to <code>Movies/WowCam</code>.</div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Features">
+    <h2>What you get</h2>
+    <div class="features">
+      <div class="feat"><b>High-bitrate 1080p</b><p>35 Mbps H.264 locked CFR, optional 60 FPS on capable cameras, 4K UHD on 4K-capable phones.</p></div>
+      <div class="feat"><b>Studio audio</b><p>VOICE_RECOGNITION / CAMCORDER / MIC auto-routing, noise suppression and acoustic echo cancellation.</p></div>
+      <div class="feat"><b>EIS stabilization</b><p>Electronic video stabilization enabled automatically on supported devices.</p></div>
+      <div class="feat"><b>Cinematic filters</b><p>Normal, Natural, Vivid, Mono and Warm — baked into the MP4 itself.</p></div>
+      <div class="feat"><b>Pro controls</b><p>Flip camera, torch, 1x–5x pinch zoom, 3S/10S timer, 30/60 FPS toggle.</p></div>
+      <div class="feat"><b>100% offline</b><p>No internet permission, no accounts, no analytics. Footage never leaves your phone.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    wow cam • com.wowcam.app • Released APK (debug-signed for direct install)<br>
+    Built with Kotlin + CameraX. Recordings: Movies/WowCam.<br>
+    *60 FPS and 4K unlock only on devices whose hardware advertises them.
+  </footer>
+
+</div>
+</body>
+</html>

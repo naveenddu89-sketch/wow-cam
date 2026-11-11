@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Flat, percentage-aware control layer.
+
+    The preview is edge-to-edge. The top hardware row is anchored to the top inset
+    (applied to flashButton at runtime) and the whole bottom stack grows upward from
+    the navigation inset, so every control stays on screen from 320x480 budget panels
+    to 1440x3200 tall displays. The record button scales with layout_constraintWidth_percent.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/wow_black"
+    android:keepScreenOn="true">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/wow_black"
+        android:contentDescription="@string/cd_preview"
+        app:implementationMode="performance"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:scaleType="fillCenter" />
+
+    <View
+        android:id="@+id/topScrim"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:background="@drawable/bg_top_scrim"
+        android:importantForAccessibility="no"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/controlsGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.52" />
+
+    <View
+        android:id="@+id/bottomScrim"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_bottom_scrim"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/controlsGuide" />
+
+    <!-- Top hardware row: status dot, banner, flash, flip, FPS. -->
+    <View
+        android:id="@+id/recordingDot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:alpha="0.35"
+        android:background="@drawable/ic_recording_dot"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@id/flashButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/flashButton"
+        android:layout_marginStart="16dp" />
+
+    <TextView
+        android:id="@+id/wowBanner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:gravity="center_vertical"
+        android:letterSpacing="0.08"
+        android:maxLines="1"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="8"
+        android:text="@string/banner"
+        android:textColor="@color/wow_white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/flashButton"
+        app:layout_constraintEnd_toStartOf="@id/flashButton"
+        app:layout_constraintStart_toEndOf="@id/recordingDot"
+        app:layout_constraintTop_toTopOf="@id/flashButton" />
+
+    <ImageButton
+        android:id="@+id/flashButton"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_chip"
+        android:contentDescription="@string/cd_flash_on"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_flash_off"
+        android:tint="@color/wow_white"
+        app:layout_constraintEnd_toStartOf="@id/flipButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/flipButton"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_chip"
+        android:contentDescription="@string/cd_flip"
+        android:padding="9dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_flip_camera"
+        android:tint="@color/wow_white"
+        app:layout_constraintBottom_toBottomOf="@id/flashButton"
+        app:layout_constraintEnd_toStartOf="@id/fpsToggle"
+        app:layout_constraintTop_toTopOf="@id/flashButton" />
+
+    <TextView
+        android:id="@+id/fpsToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_chip"
+        android:clickable="true"
+        android:contentDescription="@string/cd_fps"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="54dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/fps_default"
+        android:textColor="@color/wow_white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/flashButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/flashButton"
+        tools:text="30 FPS" />
+
+    <TextView
+        android:id="@+id/qualityText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:clickable="true"
+        android:contentDescription="@string/cd_quality"
+        android:focusable="true"
+        android:letterSpacing="0.14"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:text="@string/quality_default"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="@id/wowBanner"
+        app:layout_constraintTop_toBottomOf="@id/flashButton"
+        tools:text="1080P • 9:16 • 60 MBPS" />
+
+    <!-- Bottom stack: grows upward from the navigation inset, never clips. -->
+    <TextView
+        android:id="@+id/filterChip"
+        android:layout_width="0dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_chip"
+        android:clickable="true"
+        android:contentDescription="@string/cd_filter"
+        android:focusable="true"
+        android:gravity="center"
+        android:letterSpacing="0.06"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="@string/filter_default"
+        android:textColor="@color/wow_white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/zoomSlider"
+        app:layout_constraintEnd_toStartOf="@id/timerChip"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="FILTER • NORMAL" />
+
+    <TextView
+        android:id="@+id/timerChip"
+        android:layout_width="0dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_chip"
+        android:clickable="true"
+        android:contentDescription="@string/cd_timer"
+        android:focusable="true"
+        android:gravity="center"
+        android:letterSpacing="0.06"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="@string/timer_default"
+        android:textColor="@color/wow_white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/zoomSlider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/filterChip"
+        tools:text="TIMER • 3S" />
+
+    <TextView
+        android:id="@+id/zoomCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:letterSpacing="0.14"
+        android:text="@string/zoom_label"
+        android:textColor="@color/text_tertiary"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/zoomSlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/zoomSlider" />
+
+    <SeekBar
+        android:id="@+id/zoomSlider"
+        android:layout_width="0dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="5dp"
+        android:contentDescription="@string/cd_zoom"
+        android:max="1000"
+        android:paddingStart="0dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="0dp"
+        android:paddingBottom="8dp"
+        android:progress="0"
+        android:progressBackgroundTint="@color/chip_stroke"
+        android:progressTint="@color/wow_white"
+        android:splitTrack="false"
+        android:thumbTint="@color/wow_red"
+        app:layout_constraintBottom_toTopOf="@id/timerText"
+        app:layout_constraintEnd_toStartOf="@id/zoomLabel"
+        app:layout_constraintStart_toEndOf="@id/zoomCaption" />
+
+    <TextView
+        android:id="@+id/zoomLabel"
+        android:layout_width="42dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="monospace"
+        android:gravity="end"
+        android:text="@string/zoom_value_default"
+        android:textColor="@color/wow_white"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/zoomSlider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/zoomSlider"
+        tools:text="1.0x" />
+
+    <TextView
+        android:id="@+id/timerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="1dp"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.08"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="8"
+        android:text="@string/timer_zero"
+        android:textColor="@color/text_secondary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/statusText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="00:12" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:gravity="center"
+        android:letterSpacing="0.1"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:text="@string/quality_default"
+        android:textColor="@color/text_tertiary"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@id/recordButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="1080P • 9:16 • 30 MBPS" />
+
+    <FrameLayout
+        android:id="@+id/recordButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="4dp"
+        android:clickable="true"
+        android:contentDescription="@string/cd_record"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toTopOf="@id/hintText"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_default="percent"
+        app:layout_constraintWidth_percent="0.30">
+
+        <View
+            android:id="@+id/recordRing"
+            android:layout_width="86dp"
+            android:layout_height="86dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_record_ring"
+            android:importantForAccessibility="no" />
+
+        <View
+            android:id="@+id/recordInner"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_record_inner"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/hintText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:letterSpacing="0.18"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:text="@string/hint_record"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/audioStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="TAP TO RECORD" />
+
+    <TextView
+        android:id="@+id/audioStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:letterSpacing="0.1"
+        android:shadowColor="#A0000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:text="@string/audio_idle"
+        android:textColor="@color/text_tertiary"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="VOICE ISO • NS + AEC" />
+
+    <!-- Full-screen countdown. Tap anywhere to cancel. -->
+    <FrameLayout
+        android:id="@+id/countdownOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/countdown_scrim"
+        android:clickable="true"
+        android:contentDescription="@string/cd_cancel_countdown"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/countdownText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:includeFontPadding="false"
+                android:shadowColor="#80000000"
+                android:shadowDx="0"
+                android:shadowDy="6"
+                android:shadowRadius="18"
+                android:text="@string/countdown_default"
+                android:textColor="@color/wow_white"
+                android:textSize="150sp"
+                android:textStyle="bold"
+                tools:text="3" />
+
+            <TextView
+                android:id="@+id/countdownHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:letterSpacing="0.22"
+                android:text="@string/countdown_cancel"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,26 @@
+# Android / Gradle
+.gradle/
+build/
+local.properties
+keystore.properties
+*.jks
+*.keystore
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# test / tooling artifacts (large, generated)
+artifacts/
+webtest/node_modules/
+webtest/test-results/
+webtest/playwright-report/
+public/wow-cam.apk
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

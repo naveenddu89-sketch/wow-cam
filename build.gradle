@@ -1,0 +1,6 @@
+// Root build file for "wow cam".
+// Keep the plugin versions centralized so every module uses the same toolchain.
+plugins {
+    id 'com.android.application' version '8.9.3' apply false
+    id 'org.jetbrains.kotlin.android' version '2.1.21' apply false
+}

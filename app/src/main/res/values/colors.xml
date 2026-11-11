@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wow_black">#FF000000</color>
+    <color name="wow_white">#FFFFFFFF</color>
+    <color name="wow_red">#FFFF3B30</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_tertiary">#66FFFFFF</color>
+    <color name="chip_background">#66000000</color>
+    <color name="chip_stroke">#33FFFFFF</color>
+    <color name="chip_active_background">#4DFF3B30</color>
+    <color name="chip_active_stroke">#FFFF3B30</color>
+    <color name="countdown_scrim">#D9000000</color>
+    <color name="scrim_top">#CC000000</color>
+    <color name="transparent">#00000000</color>
+</resources>
