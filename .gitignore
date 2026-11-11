@@ -24,3 +24,6 @@ public/wow-cam.zip
 .vscode/
 .DS_Store
 Thumbs.db
+
+.firebase/
+
